@@ -55,13 +55,17 @@ async function registerSlashCommands(token, clientId, guildId) {
 
 async function handleInteraction(interaction) {
   if (!interaction.isChatInputCommand()) return;
+  // Ensure we acknowledge the interaction within 3s to prevent Unknown interaction (10062)
+  if (!interaction.deferred && !interaction.replied) {
+    await interaction.deferReply({ ephemeral: true });
+  }
 
   // Enforce admin-only access for mutating commands
   const adminOnly = new Set(["addbirthday", "updatebirthday", "removebirthday"]);
   if (adminOnly.has(interaction.commandName)) {
     const hasAdmin = interaction.memberPermissions && interaction.memberPermissions.has(0x0000000000000008n);
     if (!hasAdmin) {
-      return interaction.reply({ content: "❌ You don't have permission to use this command.", ephemeral: true });
+      return interaction.editReply({ content: "❌ You don't have permission to use this command." });
     }
   }
 
@@ -70,11 +74,11 @@ async function handleInteraction(interaction) {
     const rawDate = interaction.options.getString("date");
     const msg = interaction.options.getString("message");
     const date = normalizeDate(rawDate);
-    if (!date) return interaction.reply({ content: "❌ Invalid date. Use MM-DD", ephemeral: true });
+    if (!date) return interaction.editReply({ content: "❌ Invalid date. Use MM-DD" });
 
     const data = readBirthdays();
     if (data.find(b => b.userId === user.id)) {
-      return interaction.reply({ content: "⚠ Already exists. Use /updatebirthday", ephemeral: true });
+      return interaction.editReply({ content: "⚠ Already exists. Use /updatebirthday" });
     }
     data.push({
       userId: user.id,
@@ -84,7 +88,7 @@ async function handleInteraction(interaction) {
       displayName: user.globalName || user.username
     });
     saveBirthdays(data);
-    return interaction.reply({ content: `✅ Added for <@${user.id}> → ${date}` , ephemeral: true });
+    return interaction.editReply({ content: `✅ Added for <@${user.id}> → ${date}` });
   }
 
   if (interaction.commandName === "updatebirthday") {
@@ -92,11 +96,11 @@ async function handleInteraction(interaction) {
     const rawDate = interaction.options.getString("date");
     const msg = interaction.options.getString("message");
     const date = normalizeDate(rawDate);
-    if (!date) return interaction.reply({ content: "❌ Invalid date. Use MM-DD", ephemeral: true });
+    if (!date) return interaction.editReply({ content: "❌ Invalid date. Use MM-DD" });
 
     const data = readBirthdays();
     const found = data.find(b => b.userId === user.id);
-    if (!found) return interaction.reply({ content: "❌ Not found", ephemeral: true });
+    if (!found) return interaction.editReply({ content: "❌ Not found" });
 
     found.date = date;
     // keep stored identity fresh
@@ -104,7 +108,7 @@ async function handleInteraction(interaction) {
     found.displayName = user.globalName || user.username;
     if (msg !== null) found.message = msg || undefined;
     saveBirthdays(data);
-    return interaction.reply({ content: `♻ Updated for <@${user.id}> → ${date}` , ephemeral: true });
+    return interaction.editReply({ content: `♻ Updated for <@${user.id}> → ${date}` });
   }
 
   if (interaction.commandName === "removebirthday") {
@@ -112,14 +116,14 @@ async function handleInteraction(interaction) {
     let data = readBirthdays();
     const before = data.length;
     data = data.filter(b => b.userId !== user.id);
-    if (data.length === before) return interaction.reply({ content: "❌ Not found", ephemeral: true });
+    if (data.length === before) return interaction.editReply({ content: "❌ Not found" });
     saveBirthdays(data);
-    return interaction.reply({ content: `🗑 Removed for <@${user.id}>`, ephemeral: true });
+    return interaction.editReply({ content: `🗑 Removed for <@${user.id}>` });
   }
 
   if (interaction.commandName === "listbirthdays") {
     const data = readBirthdays();
-    if (!data.length) return interaction.reply({ content: "No birthdays saved", ephemeral: true });
+    if (!data.length) return interaction.editReply({ content: "No birthdays saved" });
     const items = await Promise.all(
       data.map(async b => {
         let name = b.displayName || b.username;
@@ -134,7 +138,7 @@ async function handleInteraction(interaction) {
     );
     const payload = { items };
     const pretty = '```json\n' + JSON.stringify(payload, null, 2) + '\n```';
-    return interaction.reply({ content: pretty, ephemeral: true });
+    return interaction.editReply({ content: pretty });
   }
 }
 
