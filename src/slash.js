@@ -1,6 +1,8 @@
 const { REST, Routes } = require("discord.js");
 const { readBirthdays, saveBirthdays } = require("./store");
 const { normalizeDate } = require("./date");
+const fs = require("fs");
+const { HOLIDAYS_PATH } = require("./config");
 
 const commands = [
   {
@@ -39,6 +41,17 @@ const commands = [
     description: "List all saved birthdays",
     default_member_permissions: "8",
     dm_permission: false,
+  }
+  ,
+  {
+    name: "holidays",
+    description: "Show company holidays",
+    dm_permission: false
+  },
+  {
+    name: "leave-policy",
+    description: "Show company leave policy",
+    dm_permission: false
   }
 ];
 
@@ -131,7 +144,7 @@ async function handleInteraction(interaction) {
           try {
             const u = await interaction.client.users.fetch(b.userId);
             name = u.globalName || u.username;
-          } catch {}
+          } catch { }
         }
         return { mention: `<@${b.userId}>`, date: b.date, name };
       })
@@ -140,6 +153,117 @@ async function handleInteraction(interaction) {
     const pretty = '```json\n' + JSON.stringify(payload, null, 2) + '\n```';
     return interaction.editReply({ content: pretty });
   }
+
+  if (interaction.commandName === "holidays") {
+    try {
+      const raw = fs.readFileSync(HOLIDAYS_PATH, "utf8");
+      const json = JSON.parse(raw);
+
+      const company = json.company || "Company";
+      const year = json.year || new Date().getFullYear();
+      const list = Array.isArray(json.holidays) ? json.holidays : [];
+
+      const groups = {
+        Optional: [],
+        "National Holiday": [],
+        "Mandatory Holiday": [],
+        "State Holiday": []
+      };
+
+      for (const h of list) {
+        if (h.type && groups[h.type]) {
+          groups[h.type].push(h);
+        }
+      }
+
+      const fmt = d => {
+        const dt = new Date(d);
+        return dt.toLocaleDateString("en-IN", {
+          month: "short",
+          day: "2-digit",
+          weekday: "short"
+        });
+      };
+
+      const lines = [];
+      lines.push(`**🌴 Holidays — ${company} ${year}**\n`);
+
+      if (groups.Optional.length) {
+        lines.push(`**🟡 Optional Holidays**`);
+        groups.Optional.forEach(h =>
+          lines.push(`• **${fmt(h.date)}** — ${h.name}`)
+        );
+        lines.push(`> _Choose **one** of the above_\n`);
+      }
+
+      if (groups["National Holiday"].length) {
+        lines.push(`**🔴 National Holidays**`);
+        groups["National Holiday"].forEach(h =>
+          lines.push(`• **${fmt(h.date)}** — ${h.name}`)
+        );
+        lines.push("");
+      }
+
+      if (groups["Mandatory Holiday"].length) {
+        lines.push(`**🟢 Mandatory Holidays**`);
+        groups["Mandatory Holiday"].forEach(h =>
+          lines.push(`• **${fmt(h.date)}** — ${h.name}`)
+        );
+        lines.push("");
+      }
+
+      if (groups["State Holiday"].length) {
+        lines.push(`**🔵 State Holiday**`);
+        groups["State Holiday"].forEach(h =>
+          lines.push(`• **${fmt(h.date)}** — ${h.name}`)
+        );
+      }
+
+      return interaction.editReply({ content: lines.join("\n") });
+    } catch (e) {
+      return interaction.editReply({ content: "❌ Failed to load holidays." });
+    }
+  }
+
+
+  if (interaction.commandName === "leave-policy") {
+    try {
+      const raw = fs.readFileSync(HOLIDAYS_PATH, "utf8");
+      const json = JSON.parse(raw);
+
+      const company = json.company || "Company";
+      const year = json.year || new Date().getFullYear();
+      const p = json.leave_policy || {};
+
+      const lines = [];
+
+      if (p.optional_holiday_rule)
+        lines.push(`• **Optional Holiday:** ${p.optional_holiday_rule}`);
+
+      if (p.mandatory_leaves != null)
+        lines.push(`• **Mandatory Leaves:** ${p.mandatory_leaves}`);
+
+      if (p.sick_leaves)
+        lines.push(`• **Sick Leaves:** ${p.sick_leaves}`);
+
+      if (p.planned_leaves)
+        lines.push(`• **Planned Leaves:** ${p.planned_leaves}`);
+
+      if (p.additional_leave)
+        lines.push(`• **Additional:** ${p.additional_leave}`);
+
+      const content = [
+        `**Leave Policy — ${company} ${year}**`,
+        "",
+        lines.length ? lines.join("\n") : "_No leave policy found_"
+      ].join("\n");
+
+      return interaction.editReply({ content });
+    } catch (e) {
+      return interaction.editReply({ content: "❌ Failed to load leave policy." });
+    }
+  }
+
 }
 
 module.exports = { registerSlashCommands, handleInteraction, commands };

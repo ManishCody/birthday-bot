@@ -1,0 +1,107 @@
+{
+  "company": "CreoWis",
+  "year": 2026,
+  "holidays": [
+    {
+      "date": "2026-01-03",
+      "day": "Thursday",
+      "name": "New Year Day",
+      "type": "Optional",
+      "note": "Optional with 14th January"
+    },
+    {
+      "date": "2026-01-14",
+      "day": "Wednesday",
+      "name": "Makar Sankranti / Magha Bihu / Pongal",
+      "type": "Optional",
+      "note": "Optional with 1st January"
+    },
+    {
+      "date": "2026-01-26",
+      "day": "Monday",
+      "name": "Republic Day",
+      "type": "National Holiday"
+    },
+    {
+      "date": "2026-03-06",
+      "day": "Friday",
+      "name": "Holi",
+      "type": "Mandatory Holiday"
+    },
+    {
+      "date": "2026-03-19",
+      "day": "Thursday",
+      "name": "Ugadi",
+      "type": "Mandatory Holiday"
+    },
+    {
+      "date": "2026-04-03",
+      "day": "Friday",
+      "name": "Good Friday",
+      "type": "Mandatory Holiday"
+    },
+    {
+      "date": "2026-05-01",
+      "day": "Friday",
+      "name": "Labour Day",
+      "type": "Mandatory Holiday"
+    },
+    {
+      "date": "2026-08-15",
+      "day": "Saturday",
+      "name": "Independence Day",
+      "type": "National Holiday",
+      "note": "Falls on Weekend"
+    },
+    {
+      "date": "2026-08-28",
+      "day": "Friday",
+      "name": "Ganesh Chaturthi",
+      "type": "Mandatory Holiday"
+    },
+    {
+      "date": "2026-10-02",
+      "day": "Friday",
+      "name": "Gandhi Jayanti",
+      "type": "National Holiday"
+    },
+    {
+      "date": "2026-10-20",
+      "day": "Tuesday",
+      "name": "Dussehra (Vijaya Dashami)",
+      "type": "Mandatory Holiday"
+    },
+    {
+      "date": "2026-11-01",
+      "day": "Sunday",
+      "name": "Karnataka Rajyotsava Day",
+      "type": "State Holiday",
+      "note": "Falls on Weekend"
+    },
+    {
+      "date": "2026-11-09",
+      "day": "Monday",
+      "name": "Diwali (Balipratipada)",
+      "type": "Mandatory Holiday"
+    },
+    {
+      "date": "2026-12-25",
+      "day": "Friday",
+      "name": "Christmas Day",
+      "type": "National Holiday"
+    }
+  ],
+  "summary": {
+    "total_listed_holidays": 14,
+    "weekend_holidays": 2,
+    "optional_holidays": 1,
+    "mandatory_holidays": 11
+  },
+  "leave_policy": {
+    "optional_holiday_rule": "Employee can choose either 1st January or 14th January as an optional holiday",
+    "mandatory_leaves": 11,
+    "sick_leaves": "As per actual usage",
+    "planned_leaves": "Subject to Manager’s approval",
+    "additional_leave": "1-2 additional days off for CreoConnect 2025 in 2026"
+  }
+}

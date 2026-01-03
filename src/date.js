@@ -5,14 +5,6 @@ function todayKey() {
   ).padStart(2, "0")}`;
 }
 
-function msUntilMidnight() {
-  const now = new Date();
-  const next = new Date(now);
-  next.setDate(now.getDate() + 1);
-  next.setHours(0, 0, 0, 0);
-  return next - now;
-}
-
 // Milliseconds until the next occurrence of the given local time (hour:minute)
 function msUntilTime(hour, minute) {
   const now = new Date();
