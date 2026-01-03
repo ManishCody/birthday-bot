@@ -28,4 +28,4 @@ function normalizeDate(input) {
   return `${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
-module.exports = { todayKey, msUntilMidnight, msUntilTime, normalizeDate };
+module.exports = { todayKey, msUntilTime, normalizeDate };
